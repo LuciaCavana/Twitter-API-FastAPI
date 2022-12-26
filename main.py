@@ -3,7 +3,7 @@ from typing import List
 
 #Models
 from Models.Tweets import Tweets, Tweets_class
-from Models.User import UserLogin, UserShow, User_class
+from Models.User import UserLogin, UserShow, UserRegister,User_class
 
 
 #FastAPI
@@ -175,17 +175,23 @@ def update_tweet(
     tags=[tags_users]
 
 )
-def signup(user:UserLogin = Body(...)):
+def signup(user:UserRegister = Body(...)):
     '''
     Signup
 
-    This pat operation register a user in the database
+    This pat operation register a user in the app and database
 
     Parameters:
     - Request body parameter:
         - ***user:UserLogin* ->  A user model with user id, username, password and email
         
-    Returns a user model with first name, last name, age, user id, username and email
+    Returns a jason whit the basic information: 
+    - ser_id::UUID
+    - first_name: str
+    - las_name: str
+    - email: Emailstr
+    - age: int
+    - brith_date: Optional[date]
     '''
     return user
 
