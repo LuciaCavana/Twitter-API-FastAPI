@@ -1,5 +1,6 @@
 #Python
 from typing import List
+import json
 
 #Models
 from Models.Tweets import Tweets, Tweets_class
@@ -193,8 +194,15 @@ def signup(user:UserRegister = Body(...)):
     - age: int
     - brith_date: Optional[date]
     '''
-    return user
-
+    with open("./json/Users.json","r+",encoding="utf-8") as file:
+        results = json.loads(file.read())
+        user = user.dict()
+        user["user_id"] = str(user["user_id"])
+        user["birth_date"] = str(user["birth_date"])
+        results.append(user)
+        file.seek(0)
+        file.write(json.dumps(results))
+        return user
 
 ###Login a user
 
@@ -250,7 +258,11 @@ def show_all_users():
     Return User model username, first name, last name, age and email
 
     '''
-    return User_class
+    with open("./json/Users.json","r+",encoding="utf-8") as file:
+        results = json.loads(file.read())
+        return results
+
+
 
 ###Show a user
 

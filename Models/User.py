@@ -65,13 +65,13 @@ class UserRegister(UserShow):
     class Config:
         schema_extra={
             "example":{
-                 "user_id": 1,
-                 "username": "LucyDanny",
-                 "password": "admin123",
+                 "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+                 "username": "LucyDany",
+                 "password": "admin123", 
                  "user_email":"lucia@example.com",
-                 "firs_name":"Lucia",
+                 "first_name":"Lucia",
                  "last_name":"Cavana",
-                 "age":22,
-                 "brith_date":"22-12-2000",
+                 "user_age":22,
+                 "birth_date":"2000-12-22",
                 }
         }
