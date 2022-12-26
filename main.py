@@ -251,16 +251,19 @@ def show_all_users():
     This path operation shows all users
 
     Parameter:
-    - Request body parameter:
-        - **users:Users** ->  A tweets model with tweet id, user id, username, message and tweet date
+    - 
 
-
-    Return User model username, first name, last name, age and email
+    Return a json  list with all user in the app, with the following keys
+    - ser_id::UUID
+    - first_name: str
+    - las_name: str
+    - email: Emailstr
+    - age: int
+    - brith_date: Optional[date]
 
     '''
-    with open("./json/Users.json","r+",encoding="utf-8") as file:
-        results = json.loads(file.read())
-        return results
+    with open("./json/Users.json","r",encoding="utf-8") as file:
+        return json.loads(file.read())
 
 
 
