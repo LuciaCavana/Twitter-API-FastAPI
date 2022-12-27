@@ -1,28 +1,42 @@
 #Python
+from typing import List
+import json
+
+#Function
+import function.Files as af
 
 #Models
-from Models.Tweets import Tweets, ShowTweets, Tweets_class
+from Models.Tweets import Tweets, Tweets_class
+from Models.User import UserLogin, UserShow, UserRegister
+
 
 #FastAPI
 
 from fastapi import FastAPI
-from fastapi.responses import HTMLResponse
 from fastapi import HTTPException
 from fastapi import status
-from fastapi import Body, Path
+from fastapi import Body, Path, Query
 
 tags_tweets = "Tweets"
 tags_users = "Users"
 
 app = FastAPI()
 
+
+#Path Operation
+
+##Tweets
+
+###Show all Tweets
+
 @app.get(path="/", 
-    response_model=ShowTweets,
+    response_model=List[Tweets],
     tags=[tags_tweets],
     status_code=status.HTTP_200_OK,
     summary="Show all tweets"
     )
-def home(tweet:Tweets = Body(...)):
+def home():
+
     '''
     Home
 
@@ -34,27 +48,17 @@ def home(tweet:Tweets = Body(...)):
 
     Return ShowTweets model with username, tweets, tweets date
     '''
-    #html = """
-    #<h1>Twitter API</h1>
-    #<div class="col-xs-12">
-    #    <div id="respond" class="tweet-respond">
-    #        <form action="http://127.0.0.1:8000/" method="post" id "tweetsform" class="" novalidate data-hs-cs-bound="true">
-    #            <p>
-    #            <br><label for="Tweet">Tweet</label></br>
-    #            <textarea required="required" id="Tweet" name="comment" cols="45" rows="8" aria-required="true"></textarea>
-    #            </p>
-    #        </form>
-    #    </div>
-    #</div>
-    #""" 
-    return tweet 
-        
+    return Tweets_class 
+
+###Post a tweet
+
+
 @app.post(
     path="/post", 
+    response_model= Tweets,
     status_code=status.HTTP_201_CREATED, 
-    tags=[tags_tweets],
-    summary="Create tweet",
-    response_model= ShowTweets
+    summary="Post tweet",
+    tags=[tags_tweets]
     )
 def post(tweets:Tweets = Body(...)):
     '''
@@ -70,14 +74,19 @@ def post(tweets:Tweets = Body(...)):
     '''
     return tweets
 
+
+###Show a tweet
+
 @app.get(
     path="/tweets/{tweet_id}",
-    tags=[tags_tweets],
+    response_model=Tweets,
     status_code=status.HTTP_200_OK,
-    summary="Show a specific tweet"
+    summary="Show a tweet",
+    tags=[tags_tweets]
+
     )
 def show_tweet(
-    tweet_id:int = Path(..., gt=0, title="Tweet id", description="This is a tweet id")
+    tweet_id:int = Path(..., gt=0, title="Tweet id", description="This is a tweet id",example=1)
 ):
     '''
     Show tweet
@@ -99,12 +108,13 @@ def show_tweet(
 
 @app.delete(
     path="/tweets/{tweet_id}/delete",
-    tags=[tags_tweets],
+    response_model=Tweets,
+    status_code=status.HTTP_200_OK,
     summary="Delete tweets",
-    status_code=status.HTTP_200_OK
+    tags=[tags_tweets]
 )
 def delete_tweet(
-    Tweet_id:int = Path(...,gt=0,title="Tweet ID",description="enter the id tweet ")
+    tweet_id:int = Path(...,gt=0,title="Tweet ID",description="enter the id tweet ",example=1)
 ):
     '''
     Tweet Delete
@@ -117,7 +127,7 @@ def delete_tweet(
 
     Return menssage successful 
     '''
-    if Tweet_id not in Tweets_class:
+    if tweet_id not in Tweets_class:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="the required tweet id does not exist!"
@@ -125,14 +135,18 @@ def delete_tweet(
 
     return "the tweet was deleted successfully"
 
-@app.post(
+
+###Update a tweet
+
+@app.put(
     path="/tweets/{tweet_id}/update",
-    tags=[tags_tweets],
+    response_model=Tweets,
     summary="Update tweet",
-    status_code= status.HTTP_200_OK
+    status_code= status.HTTP_200_OK,
+    tags=[tags_tweets]
 )
 def update_tweet(
-    Tweet_id:int = Path(...,gt=0,title="Tweet ID",description="enter the id tweet ")
+    tweet_id:int = Path(...,gt=0,title="Tweet ID",description="enter the id tweet ",example=1)
 ):
     '''
     Update tweet
@@ -145,9 +159,10 @@ def update_tweet(
 
     Return menssage successful 
     '''
-    if Tweet_id not in Tweets_class:
+    if tweet_id not in Tweets_class:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="the required tweet id does not exist!"
         )
     return "Tweet modify successful"
+

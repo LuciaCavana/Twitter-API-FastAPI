@@ -47,6 +47,6 @@ class UserRegister(UserShow):
                  "first_name":"Lucia",
                  "last_name":"Cavana",
                  "user_age":22,
-                 "birth_date":"2000-12-22",
+                 "birth_date":"2000-12-22"
                 }
         }

@@ -2,6 +2,9 @@
 from typing import List
 import json
 
+#Function
+import function.Files as af
+
 #Models
 from Models.Tweets import Tweets, Tweets_class
 from Models.User import UserLogin, UserShow, UserRegister
@@ -194,15 +197,12 @@ def signup(user:UserRegister = Body(...)):
     - age: int
     - brith_date: Optional[date]
     '''
-    with open("./json/Users.json","r+",encoding="utf-8") as file:
-        results = json.loads(file.read())
-        user = user.dict()
-        user["user_id"] = str(user["user_id"])
-        user["birth_date"] = str(user["birth_date"])
-        results.append(user)
-        file.seek(0)
-        file.write(json.dumps(results))
-        return user
+
+    user = user.dict()
+    user["user_id"] = str(user["user_id"])
+    user["birth_date"] = str(user["birth_date"])
+    af.include_json("./json/Users.json", user)
+    return user
 
 ###Login a user
 
@@ -262,8 +262,7 @@ def show_all_users():
     - brith_date: Optional[date]
 
     '''
-    with open("./json/Users.json","r",encoding="utf-8") as file:
-        return json.loads(file.read())
+    return af.read_json("./json/Users.json")
 
 
 
@@ -324,14 +323,14 @@ def delete_user(
     '''
 #No funciona 
     with open("./json/Users.json","r+",encoding="utf-8") as file:
-        #result = json.loads(file.read())
-        for items in json.loads(file.read()) :
-            if user_id in items["user_id"]:
-                items.remove()
-        return items
     
-    pass
-
+        result= json.loads(file.read())
+        for data  in result :
+            if user_id == data["user_id"]:  
+                result.remove(data)  
+                remplace_json(result,"./json/Users.json")
+        return result
+    
 
 ###Update a user
 
