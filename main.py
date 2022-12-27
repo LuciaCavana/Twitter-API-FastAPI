@@ -4,7 +4,7 @@ import json
 
 #Models
 from Models.Tweets import Tweets, Tweets_class
-from Models.User import UserLogin, UserShow, UserRegister,User_class
+from Models.User import UserLogin, UserShow, UserRegister
 
 
 #FastAPI
@@ -278,7 +278,7 @@ def show_all_users():
 )
 def show_users(
 
-    user_id:int = Path(..., gt=0, title="User id", description="This is a user id",example=1)
+    user_id:str = Path(..., max_length=36, title="User id", description="This is a user id",example="3fa85f64-5717-4562-b3fc-2c963f66afa6")
 ):
     '''
     Users
@@ -293,25 +293,23 @@ def show_users(
     Return User model username, first name, last name, age and email
 
     '''
-    if user_id not in User_class:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="the required user id does not exist!"
-        )
-    return dict(User_class[user_id])
-
+    with open("./json/Users.json","r",encoding="utf-8") as file:
+        for items in json.loads(file.read()) :
+            if user_id in items["user_id"]:
+                return items
+        
 ###Delete a user
 
 @app.delete(
     path="/user/{user_id}/delete",
-    response_model=UserShow,
+    response_model=List[UserShow],
     tags=[tags_users],
     summary="Delete a user",
     status_code=status.HTTP_200_OK
 
 )
 def delete_user(
-    user_id:int = Path(..., gt=0, title="User id", description="This is a user id",example=1)
+        user_id:str = Path(..., max_length=36, title="User id", description="This is a user id",example="3fa85f64-5717-4562-b3fc-2c963f66afa6")
 ):
     '''
     Delete user
@@ -324,12 +322,15 @@ def delete_user(
 
     Return menssage successful 
     '''
-    if user_id not in User_class:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="the required user id does not exist!"
-        )
-    return "the user was deleted successfully"
+#No funciona 
+    with open("./json/Users.json","r+",encoding="utf-8") as file:
+        #result = json.loads(file.read())
+        for items in json.loads(file.read()) :
+            if user_id in items["user_id"]:
+                items.remove()
+        return items
+    
+    pass
 
 
 ###Update a user
@@ -355,10 +356,4 @@ def update_user(
 
     Return menssage successful 
     '''
-    if user_id not in User_class:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="the required user id does not exist!"
-        )
-
-    return "the user was modify successfully"
+    pass

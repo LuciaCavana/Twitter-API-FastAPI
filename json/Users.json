@@ -10,7 +10,7 @@
         "password": "admin123"
     },
     {
-        "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "user_id": "4fa85f64-5717-4562-b3fc-2c963f66afa6",
         "user_email": "Rocio@example.com",
         "first_name": "Rocio",
         "last_name": "Garcia",
@@ -20,7 +20,7 @@
         "password": "rocio123"
     },
     {
-        "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "user_id": "5fa85f64-5717-4562-b3fc-2c963f66afa6",
         "user_email": "Fernando@example.com",
         "first_name": "Fernando",
         "last_name": "Diaz",
