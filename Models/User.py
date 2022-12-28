@@ -18,7 +18,7 @@ class UserLogin(UserBase):
     class Config:
         schema_extra={
             "example":{
-                 "user_id": 1,
+                "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
                  "username": "LucyDanny",
                  "password": "admin123",
                  "user_email":"lucia@example.com"

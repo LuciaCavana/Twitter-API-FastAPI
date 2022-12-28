@@ -1,6 +1,7 @@
 #Python
-from typing import List
+from typing import List, Optional
 import json
+from datetime import date
 
 #Function
 import function.Files as af
@@ -208,12 +209,13 @@ def signup(user:UserRegister = Body(...)):
 
 @app.post(
     path="/login",
-    response_model=UserShow,
+    #response_model=UserShow,
     summary="Login a user",
     status_code=status.HTTP_200_OK, 
     tags=[tags_users])
 def login(
-    user_id:int = Query(..., gt=0, title="User id", description="This is a user id",example=1)
+    username:str = Query(default="LucyDany", max_length=20, min_length=1, title="Username", description="This is the Username"),
+    password:str = Query(default="admin123", min_length=8, max_length=64)
 ):
     '''
     Login
@@ -226,12 +228,14 @@ def login(
         
     Returns a user model with first name, last name, age, user id, username and email
     '''
-    if user_id not in User_class:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="the required user id does not exist!"
-        )
-    return {user_id:"Exist!"}
+    users_dict = af.read_json("./json/Users.json") #return dictionary Users
+    for user in users_dict:
+       if user["username"] == username and user["password"] == password:
+            return "Login exited is user : " + user["username"]
+    raise HTTPException(
+       status_code=status.HTTP_404_NOT_FOUNDs,
+       detail= "Password or username is incorrect"
+    )  
 
 ###Show All Users
 
@@ -242,7 +246,6 @@ def login(
     summary="Show all users",
     tags=[tags_users]
 )
-
 def show_all_users():
     ''' 
     Show all users
@@ -321,28 +324,31 @@ def delete_user(
 
     Return menssage successful 
     '''
-#No funciona 
-    with open("./json/Users.json","r+",encoding="utf-8") as file:
-    
-        result= json.loads(file.read())
-        for data  in result :
-            if user_id == data["user_id"]:  
-                result.remove(data)  
-                remplace_json(result,"./json/Users.json")
-        return result
+
+    results = af.read_json("./json/Users.json","r+")
+    for data  in results:
+        if user_id == data["user_id"]:  
+            results.remove(data)  
+            af.remplace_json(results,"./json/Users.json")
+    return results
     
 
 ###Update a user
 
 @app.put(
-    path="/tweets/{user_id}/update",
+    path="/user/{user_id}/update",
     tags=[tags_users],
     response_model=UserShow,
     status_code=status.HTTP_200_OK,
     summary="Update a user"
 )
 def update_user(
-    user_id:int = Path(..., gt=0, title="User id", description="This is a user id",example=1)
+    user_id:str = Path(..., max_length=36 , title="User id", description="This is a user id",example=1),
+    username:str= Path(..., max_length=20, min_length=1, title="Username", description="This is the Username"),
+    first_name:str =Path(..., max_length=20, min_length=1, title="First Name", description="This is the user first name"),
+    last_name:str=Path(..., max_length=20, min_length=1, title="Last name", description="This is the user last name"),
+    user_age:int=Path(..., gt=17, lt=115,title="User age", description="This is the user age"),
+    birth_date: date = Path(...)
 ):
     '''
     Update user
@@ -355,4 +361,22 @@ def update_user(
 
     Return menssage successful 
     '''
-    pass
+    update = {
+                 "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", #no update
+                 "username": username,
+                 "password": "admin123", #no update
+                 "user_email":"lucia@example.com", #no update
+                 "first_name":first_name,
+                 "last_name":last_name,
+                 "user_age":user_age, #mas de 18
+                 "birth_date":birth_date
+                }
+    results = af.read_json("./json/Users.json")
+    for data  in results:
+        if user_id == data["user_id"]:
+            results.remove(data)
+            results.append(update)
+            af.remplace_json("./json/Users.json",results) 
+            
+            pass        
+    return [results,{username:"update exit"}]
