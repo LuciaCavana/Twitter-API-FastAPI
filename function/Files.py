@@ -41,3 +41,16 @@ def return_entidad_expesifiqued(path, id, campo):
         if item[campo] == id:
             return item
     
+
+def delete(path, id,campo,Succefully, error):
+    try:
+        results = read_json(path)
+        item = return_entidad_expesifiqued(path, id, campo)
+        results.remove(item)
+        remplace_json(path,results)
+        return Succefully
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=error
+        ) 

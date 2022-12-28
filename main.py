@@ -1,15 +1,10 @@
 #Python
-from typing import List, Optional
-import json
-from datetime import date
-
 #Function
 import function.Files as af
 
 #Models
-from Models.Tweets import Tweets, Tweets_class
-from Models.User import UserLogin, UserShow, UserRegister
-
+from Models.Tweets import Tweets
+from Models.User import UserShow, UserRegister
 
 #FastAPI
 
@@ -112,13 +107,12 @@ def show_tweet(
 
 @app.delete(
     path="/tweets/{tweet_id}/delete",
-    response_model=Tweets,
     status_code=status.HTTP_200_OK,
     summary="Delete tweets",
     tags=[tags_tweets]
 )
 def delete_tweet(
-    tweet_id:int = Path(...,gt=0,title="Tweet ID",description="enter the id tweet ",example=1)
+    tweet_id:str = Path(...,max_length=36,min_length=36,title="Tweet ID",description="enter the id tweet ",example=1)
 ):
     '''
     Tweet Delete
@@ -127,18 +121,13 @@ def delete_tweet(
 
     parameter:
     - Request path operation:
-        - **tweet_id:int** -> id of the tweet you want to delete in the database
+        - **tweet_id:str** -> id of the tweet you want to delete in the database
 
-    Return menssage successful 
+    Return menssage successful or not
     '''
-    if tweet_id not in Tweets_class:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="the required tweet id does not exist!"
-        )
 
-    return "the tweet was deleted successfully"
-
+    return af.delete("./json/Tweets.json",tweet_id, "tweet_id","Tweet deleted successfully","Non-existent tweet id!")
+    
 ###Update a tweet
 
 @app.put(
@@ -149,7 +138,8 @@ def delete_tweet(
     tags=[tags_tweets]
 )
 def update_tweet(
-    tweet_id:int = Path(...,gt=0,title="Tweet ID",description="enter the id tweet ",example=1)
+    tweet_id:str = Path(...,gt=0,title="Tweet ID",description="enter the id tweet ",example=1),
+    tweet:Tweets = Body(...)
 ):
     '''
     Update tweet
@@ -158,16 +148,25 @@ def update_tweet(
 
     parameter:
     -Request path operation:
-        -**tweet_id:int** -> id of the tweet you want to update in the database
+        -**tweet_id:str** -> id of the tweet you want to update in the database
 
-    Return menssage successful 
+    Return menssage successful or not
     '''
-    if tweet_id not in Tweets_class:
+
+    item = af.return_entidad_expesifiqued("./json/Tweets.json",tweet_id,"tweet_id")
+    tweet_id = str(tweet_id)
+    tweet = tweet.dict()
+    tweet["tweet_id"] = tweet_id
+    tweet["id_user"] = str(item["id_user"])
+    tweet["created_at"] = str(item["created_at"])
+    
+    tweet_update, term = af.update_json("./json/Users.json", tweet, (af.read_json("./json/Users.json")),tweet_id)
+    if term == False:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="the required tweet id does not exist!"
+            detail="Non-existent user id!"
         )
-    return "Tweet modify successful"
+    return tweet_update
 
 
 ##User
@@ -269,8 +268,6 @@ def show_all_users():
     '''
     return af.read_json("./json/Users.json")
 
-
-
 ###Show a user
 
 @app.get(
@@ -321,24 +318,11 @@ def delete_user(
 
     parameter:
     -Request path operation:
-        -**user_id:int** -> id of the user you want to delete in the database
+        -**user_id:str** -> id of the user you want to delete in the database
 
     Return menssage successful or not
     '''
-    path = "./json/Users.json"
-    try:
-        results = af.read_json(path)
-        user = af.return_entidad_expesifiqued(path, user_id, "user_id")
-        results.remove(user)
-        af.remplace_json(path,results)
-        return "User deleted successfully"
-    except:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="Non-existent user id!"
-        ) 
-    
-    
+    return af.delete("./json/Users.json",user_id, "tweet_id","User deleted successfully","Non-existent user id!")
 
 ###Update a user
 
