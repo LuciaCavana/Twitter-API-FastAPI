@@ -338,45 +338,20 @@ def delete_user(
 @app.put(
     path="/user/{user_id}/update",
     tags=[tags_users],
-    response_model=UserShow,
+    #response_model=UserShow,
     status_code=status.HTTP_200_OK,
-    summary="Update a user"
+    summary="Update a user",
 )
 def update_user(
-    user_id:str = Path(..., max_length=36 , title="User id", description="This is a user id",example=1),
-    username:str= Path(..., max_length=20, min_length=1, title="Username", description="This is the Username"),
-    first_name:str =Path(..., max_length=20, min_length=1, title="First Name", description="This is the user first name"),
-    last_name:str=Path(..., max_length=20, min_length=1, title="Last name", description="This is the user last name"),
-    user_age:int=Path(..., gt=17, lt=115,title="User age", description="This is the user age"),
-    birth_date: date = Path(...)
-):
-    '''
-    Update user
+        user_id:str = Path(..., max_length=36 , title="User id", description="This is a user id",example=1),
+        user:UserShow = Body(...)
+    ):
 
-    This path operation an id of a user is entered and modify from the database
+    user_id = str(user_id)
+    user = user.dict()
+    user["user_id"] = str(user["user_id"])
+    user["birth_date"] = str(user["birth_date"])
 
-    parameter:
-    -Request path operation:
-        -**user_id:int** -> id of the user you want to update in the database
-
-    Return menssage successful 
-    '''
-    update = {
-                 "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", #no update
-                 "username": username,
-                 "password": "admin123", #no update
-                 "user_email":"lucia@example.com", #no update
-                 "first_name":first_name,
-                 "last_name":last_name,
-                 "user_age":user_age, #mas de 18
-                 "birth_date":birth_date
-                }
     results = af.read_json("./json/Users.json")
-    for data  in results:
-        if user_id == data["user_id"]:
-            results.remove(data)
-            results.append(update)
-            af.remplace_json("./json/Users.json",results) 
-            
-            pass        
-    return [results,{username:"update exit"}]
+    return af.update_json("./json/Users.json", user, results,user_id)
+        

@@ -25,8 +25,6 @@ class UserLogin(UserBase):
                 }
         }
 
-
-
 class UserShow(UserBase):
     first_name:str =Field(..., max_length=20, min_length=1, title="First Name", description="This is the user first name")
     last_name:str=Field(..., max_length=20, min_length=1, title="Last name", description="This is the user last name")
@@ -34,6 +32,7 @@ class UserShow(UserBase):
     birth_date: Optional[date] = Field(default=None)
 
 class UserRegister(UserShow):
+
     username:str=Field(..., max_length=20, min_length=1, title="Username", description="This is the Username")
     password: str = Field(..., min_length=8, max_length=64)
 
