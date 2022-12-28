@@ -1,14 +1,10 @@
 #Python
-from typing import List
-import json
-
 #Function
 import function.Files as af
 
 #Models
-from Models.Tweets import Tweets, Tweets_class
-from Models.User import UserLogin, UserShow, UserRegister
-
+from Models.Tweets import Tweets
+from Models.User import UserShow, UserRegister
 
 #FastAPI
 
@@ -48,7 +44,7 @@ def home():
 
     Return ShowTweets model with username, tweets, tweets date
     '''
-    return Tweets_class 
+    return af.read_json("./json/Tweets.json")
 
 ###Post a tweet
 
@@ -72,6 +68,13 @@ def post(tweets:Tweets = Body(...)):
 
     Return ShowTweets model with username, tweets, tweets date
     '''
+    tweets =tweets.dict()
+    tweets["tweet_id"] = str(tweets["tweet_id"])
+    tweets["created_at"] = str(tweets["created_at"])
+    tweets["update_at"] = str(tweets["update_at"])
+    tweets["id_user"] = str(tweets["id_user"])
+
+    af.include_json("./json/Tweets.json",tweets)
     return tweets
 
 
@@ -86,7 +89,7 @@ def post(tweets:Tweets = Body(...)):
 
     )
 def show_tweet(
-    tweet_id:int = Path(..., gt=0, title="Tweet id", description="This is a tweet id",example=1)
+    tweet_id:str = Path(..., max_length=36, min_length=36, title="Tweet id", description="This is a tweet id",example=1)
 ):
     '''
     Show tweet
@@ -99,22 +102,17 @@ def show_tweet(
 
     Return the username, the tweet, and the date of the tweet
     '''
-    if tweet_id not in Tweets_class:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="the required tweet id does not exist!"
-        )
-    return dict(Tweets_class[tweet_id])
+    result = af.return_entidad_expesifiqued("./json/Tweets.json", tweet_id,"tweet_id")
+    return result
 
 @app.delete(
     path="/tweets/{tweet_id}/delete",
-    response_model=Tweets,
     status_code=status.HTTP_200_OK,
     summary="Delete tweets",
     tags=[tags_tweets]
 )
 def delete_tweet(
-    tweet_id:int = Path(...,gt=0,title="Tweet ID",description="enter the id tweet ",example=1)
+    tweet_id:str = Path(...,max_length=36,min_length=36,title="Tweet ID",description="enter the id tweet ",example=1)
 ):
     '''
     Tweet Delete
@@ -123,19 +121,13 @@ def delete_tweet(
 
     parameter:
     - Request path operation:
-        - **tweet_id:int** -> id of the tweet you want to delete in the database
+        - **tweet_id:str** -> id of the tweet you want to delete in the database
 
-    Return menssage successful 
+    Return menssage successful or not
     '''
-    if tweet_id not in Tweets_class:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="the required tweet id does not exist!"
-        )
 
-    return "the tweet was deleted successfully"
-
-
+    return af.delete("./json/Tweets.json",tweet_id, "tweet_id","Tweet deleted successfully","Non-existent tweet id!")
+    
 ###Update a tweet
 
 @app.put(
@@ -146,7 +138,8 @@ def delete_tweet(
     tags=[tags_tweets]
 )
 def update_tweet(
-    tweet_id:int = Path(...,gt=0,title="Tweet ID",description="enter the id tweet ",example=1)
+    tweet_id:str = Path(...,gt=0,title="Tweet ID",description="enter the id tweet ",example=1),
+    tweet:Tweets = Body(...)
 ):
     '''
     Update tweet
@@ -155,16 +148,25 @@ def update_tweet(
 
     parameter:
     -Request path operation:
-        -**tweet_id:int** -> id of the tweet you want to update in the database
+        -**tweet_id:str** -> id of the tweet you want to update in the database
 
-    Return menssage successful 
+    Return menssage successful or not
     '''
-    if tweet_id not in Tweets_class:
+
+    item = af.return_entidad_expesifiqued("./json/Tweets.json",tweet_id,"tweet_id")
+    tweet_id = str(tweet_id)
+    tweet = tweet.dict()
+    tweet["tweet_id"] = tweet_id
+    tweet["id_user"] = str(item["id_user"])
+    tweet["created_at"] = str(item["created_at"])
+    
+    tweet_update, term = af.update_json("./json/Users.json", tweet, (af.read_json("./json/Users.json")),tweet_id)
+    if term == False:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="the required tweet id does not exist!"
+            detail="Non-existent user id!"
         )
-    return "Tweet modify successful"
+    return tweet_update
 
 
 ##User
@@ -208,12 +210,13 @@ def signup(user:UserRegister = Body(...)):
 
 @app.post(
     path="/login",
-    response_model=UserShow,
+    #response_model=UserShow,
     summary="Login a user",
     status_code=status.HTTP_200_OK, 
     tags=[tags_users])
 def login(
-    user_id:int = Query(..., gt=0, title="User id", description="This is a user id",example=1)
+    username:str = Query(default="LucyDany", max_length=20, min_length=1, title="Username", description="This is the Username"),
+    password:str = Query(default="admin123", min_length=8, max_length=64)
 ):
     '''
     Login
@@ -226,12 +229,14 @@ def login(
         
     Returns a user model with first name, last name, age, user id, username and email
     '''
-    if user_id not in User_class:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="the required user id does not exist!"
-        )
-    return {user_id:"Exist!"}
+    users_dict = af.read_json("./json/Users.json") #return dictionary Users
+    for user in users_dict:
+       if user["username"] == username and user["password"] == password:
+            return "Login exited is user : " + user["username"]
+    raise HTTPException(
+       status_code=status.HTTP_404_NOT_FOUNDs,
+       detail= "Password or username is incorrect"
+    )  
 
 ###Show All Users
 
@@ -242,7 +247,6 @@ def login(
     summary="Show all users",
     tags=[tags_users]
 )
-
 def show_all_users():
     ''' 
     Show all users
@@ -263,8 +267,6 @@ def show_all_users():
 
     '''
     return af.read_json("./json/Users.json")
-
-
 
 ###Show a user
 
@@ -292,16 +294,15 @@ def show_users(
     Return User model username, first name, last name, age and email
 
     '''
-    with open("./json/Users.json","r",encoding="utf-8") as file:
-        for items in json.loads(file.read()) :
-            if user_id in items["user_id"]:
-                return items
+
+    return af.return_entidad_expesifiqued("./json/Users.json",user_id, "user_id")
+
         
 ###Delete a user
 
 @app.delete(
     path="/user/{user_id}/delete",
-    response_model=List[UserShow],
+    #response_model=List[UserShow],
     tags=[tags_users],
     summary="Delete a user",
     status_code=status.HTTP_200_OK
@@ -317,42 +318,36 @@ def delete_user(
 
     parameter:
     -Request path operation:
-        -**user_id:int** -> id of the user you want to delete in the database
+        -**user_id:str** -> id of the user you want to delete in the database
 
-    Return menssage successful 
+    Return menssage successful or not
     '''
-#No funciona 
-    with open("./json/Users.json","r+",encoding="utf-8") as file:
-    
-        result= json.loads(file.read())
-        for data  in result :
-            if user_id == data["user_id"]:  
-                result.remove(data)  
-                remplace_json(result,"./json/Users.json")
-        return result
-    
+    return af.delete("./json/Users.json",user_id, "tweet_id","User deleted successfully","Non-existent user id!")
 
 ###Update a user
 
 @app.put(
-    path="/tweets/{user_id}/update",
+    path="/user/{user_id}/update",
     tags=[tags_users],
     response_model=UserShow,
     status_code=status.HTTP_200_OK,
-    summary="Update a user"
+    summary="Update a user",
 )
 def update_user(
-    user_id:int = Path(..., gt=0, title="User id", description="This is a user id",example=1)
-):
-    '''
-    Update user
+        user_id:str = Path(..., max_length=36 , title="User id", description="This is a user id",example=1),
+        user:UserShow = Body(...)
+    ):
 
-    This path operation an id of a user is entered and modify from the database
-
-    parameter:
-    -Request path operation:
-        -**user_id:int** -> id of the user you want to update in the database
-
-    Return menssage successful 
-    '''
-    pass
+    user_id = str(user_id)
+    user = user.dict()
+    user["user_id"] = str(user["user_id"])
+    user["birth_date"] = str(user["birth_date"])
+    
+    user, term = af.update_json("./json/Users.json", user, (af.read_json("./json/Users.json")),user_id)
+    if term == False:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Non-existent user id!"
+        )
+    return user
+        

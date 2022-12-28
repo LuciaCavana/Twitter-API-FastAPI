@@ -18,14 +18,12 @@ class UserLogin(UserBase):
     class Config:
         schema_extra={
             "example":{
-                 "user_id": 1,
+                "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
                  "username": "LucyDanny",
                  "password": "admin123",
                  "user_email":"lucia@example.com"
                 }
         }
-
-
 
 class UserShow(UserBase):
     first_name:str =Field(..., max_length=20, min_length=1, title="First Name", description="This is the user first name")
@@ -34,6 +32,7 @@ class UserShow(UserBase):
     birth_date: Optional[date] = Field(default=None)
 
 class UserRegister(UserShow):
+
     username:str=Field(..., max_length=20, min_length=1, title="Username", description="This is the Username")
     password: str = Field(..., min_length=8, max_length=64)
 
