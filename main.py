@@ -161,6 +161,8 @@ def update_tweet(
     Update tweet
 
     This path operation an id of a tweet is entered and modify from the database
+    -**content:str**
+    -**update_at:datetime**
 
     parameter:
     -Request path operation:
@@ -353,10 +355,25 @@ def update_user(
         user_id:str = Path(..., max_length=36 , title="User id", description="This is a user id",example=1),
         user:UserShow = Body(...)
     ):
+    '''
+    User tweet
 
+    This path operation an id of a tweet is entered and modify from the database
+    -**first_name:str**
+    -**last_name:str**
+    -**user_age:int**
+    -**birth_date:date**
+
+    parameter:
+    -Request path operation:
+        -**tweet_id:str** -> id of the tweet you want to update in the database
+
+    Return menssage successful or not
+    '''
+    item = af.return_entidad_expesifiqued("./json/User.json")
     user_id = str(user_id)
     user = user.dict()
-    user["user_id"] = str(user["user_id"])
+    user["user_id"] = user_id
     user["birth_date"] = str(user["birth_date"])
     
     user, term = af.update_json("./json/Users.json", user, (af.read_json("./json/Users.json")),user_id)
