@@ -3,10 +3,12 @@ import json
 from fastapi import HTTPException, status
 
 def remplace_json(path,result):
-    with open(path, "w", encoding="utf-8") as f:
-        f.seek(0)
-        f.write(json.dumps(result))
-    return result
+
+        with open(path, "w", encoding="utf-8") as f:
+            f.seek(0)
+            f.write(json.dumps(result))
+        return True
+    
 
 def read_json(path):
     with open(path,"r+",encoding="utf-8") as file:
@@ -26,9 +28,16 @@ def update_json(path, dictionary, results,id):
         if user["user_id"] == id:
             results[results.index(user)] = dictionary
             remplace_json(path,results)
-            return dictionary
+            return dictionary,True
     else:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="¡This user_id doesn't exist!"
-        )     
+        dic = {}
+        return dic,False
+
+
+def return_entidad_expesifiqued(path, id, campo):
+    results = read_json(path)
+
+    for item in results:
+        if item[campo] == id:
+            return item
+    

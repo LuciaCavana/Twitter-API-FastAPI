@@ -49,7 +49,7 @@ def home():
 
     Return ShowTweets model with username, tweets, tweets date
     '''
-    return Tweets_class 
+    return af.read_json("./json/Tweets.json")
 
 ###Post a tweet
 
@@ -73,6 +73,13 @@ def post(tweets:Tweets = Body(...)):
 
     Return ShowTweets model with username, tweets, tweets date
     '''
+    tweets =tweets.dict()
+    tweets["tweet_id"] = str(tweets["tweet_id"])
+    tweets["created_at"] = str(tweets["created_at"])
+    tweets["update_at"] = str(tweets["update_at"])
+    tweets["id_user"] = str(tweets["id_user"])
+
+    af.include_json("./json/Tweets.json",tweets)
     return tweets
 
 
@@ -87,7 +94,7 @@ def post(tweets:Tweets = Body(...)):
 
     )
 def show_tweet(
-    tweet_id:int = Path(..., gt=0, title="Tweet id", description="This is a tweet id",example=1)
+    tweet_id:str = Path(..., max_length=36, min_length=36, title="Tweet id", description="This is a tweet id",example=1)
 ):
     '''
     Show tweet
@@ -100,12 +107,8 @@ def show_tweet(
 
     Return the username, the tweet, and the date of the tweet
     '''
-    if tweet_id not in Tweets_class:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail="the required tweet id does not exist!"
-        )
-    return dict(Tweets_class[tweet_id])
+    result = af.return_entidad_expesifiqued("./json/Tweets.json", tweet_id,"tweet_id")
+    return result
 
 @app.delete(
     path="/tweets/{tweet_id}/delete",
@@ -135,7 +138,6 @@ def delete_tweet(
         )
 
     return "the tweet was deleted successfully"
-
 
 ###Update a tweet
 
@@ -295,16 +297,15 @@ def show_users(
     Return User model username, first name, last name, age and email
 
     '''
-    with open("./json/Users.json","r",encoding="utf-8") as file:
-        for items in json.loads(file.read()) :
-            if user_id in items["user_id"]:
-                return items
+
+    return af.return_entidad_expesifiqued("./json/Users.json",user_id, "user_id")
+
         
 ###Delete a user
 
 @app.delete(
     path="/user/{user_id}/delete",
-    response_model=List[UserShow],
+    #response_model=List[UserShow],
     tags=[tags_users],
     summary="Delete a user",
     status_code=status.HTTP_200_OK
@@ -322,15 +323,21 @@ def delete_user(
     -Request path operation:
         -**user_id:int** -> id of the user you want to delete in the database
 
-    Return menssage successful 
+    Return menssage successful or not
     '''
-
-    results = af.read_json("./json/Users.json","r+")
-    for data  in results:
-        if user_id == data["user_id"]:  
-            results.remove(data)  
-            af.remplace_json(results,"./json/Users.json")
-    return results
+    path = "./json/Users.json"
+    try:
+        results = af.read_json(path)
+        user = af.return_entidad_expesifiqued(path, user_id, "user_id")
+        results.remove(user)
+        af.remplace_json(path,results)
+        return "User deleted successfully"
+    except:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Non-existent user id!"
+        ) 
+    
     
 
 ###Update a user
@@ -338,7 +345,7 @@ def delete_user(
 @app.put(
     path="/user/{user_id}/update",
     tags=[tags_users],
-    #response_model=UserShow,
+    response_model=UserShow,
     status_code=status.HTTP_200_OK,
     summary="Update a user",
 )
@@ -351,7 +358,12 @@ def update_user(
     user = user.dict()
     user["user_id"] = str(user["user_id"])
     user["birth_date"] = str(user["birth_date"])
-
-    results = af.read_json("./json/Users.json")
-    return af.update_json("./json/Users.json", user, results,user_id)
+    
+    user, term = af.update_json("./json/Users.json", user, (af.read_json("./json/Users.json")),user_id)
+    if term == False:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Non-existent user id!"
+        )
+    return user
         
