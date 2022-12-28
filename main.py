@@ -109,7 +109,7 @@ def show_tweet(
 
     parameters:
     - Request path parameter:
-        - **tweet_id:int** -> referenced tweet id
+        - **tweet_id:str** -> referenced tweet id
 
     Return tweet models with:
     -**tweet_id:UUID**
@@ -154,7 +154,7 @@ def delete_tweet(
     tags=[tags_tweets]
 )
 def update_tweet(
-    tweet_id:str = Path(...,gt=0,title="Tweet ID",description="enter the id tweet ",example=1),
+    tweet_id:str = Path(...,max_length=36,min_length=36,title="Tweet ID",description="enter the id tweet ",example=1),
     tweet:Tweets = Body(...)
 ):
     '''
@@ -172,7 +172,6 @@ def update_tweet(
     '''
 
     item = af.return_entidad_expesifiqued("./json/Tweets.json",tweet_id,"tweet_id")
-    tweet_id = str(tweet_id)
     tweet = tweet.dict()
     tweet["tweet_id"] = tweet_id
     tweet["id_user"] = str(item["id_user"])
