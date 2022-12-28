@@ -1,4 +1,5 @@
 #Python
+from typing import List
 #Function
 import function.Files as af
 
@@ -42,7 +43,12 @@ def home():
     - Request body parameter:
         - **tweet:Tweets** ->  A tweets model with tweet id, user id, username, message and tweet date
 
-    Return ShowTweets model with username, tweets, tweets date
+    Return Tweets model with:
+    -**tweet_id:UUID**
+    -**content: str**
+    -**created_at:datetime**
+    -**update_at:datetime**
+    -**id_user:UUID**
     '''
     return af.read_json("./json/Tweets.json")
 
@@ -66,7 +72,12 @@ def post(tweets:Tweets = Body(...)):
     - Request body parameter:
         - **tweet:Tweets** -> A tweets model with tweet id, user id, username, message and tweet date
 
-    Return ShowTweets model with username, tweets, tweets date
+    Return tweets model with:
+    -**tweet_id:UUID**
+    -**content: str**
+    -**created_at:datetime**
+    -**update_at:datetime**
+    -**id_user:UUID**
     '''
     tweets =tweets.dict()
     tweets["tweet_id"] = str(tweets["tweet_id"])
@@ -100,7 +111,12 @@ def show_tweet(
     - Request path parameter:
         - **tweet_id:int** -> referenced tweet id
 
-    Return the username, the tweet, and the date of the tweet
+    Return tweet models with:
+    -**tweet_id:UUID**
+    -**content: str**
+    -**created_at:datetime**
+    -**update_at:datetime**
+    -**id_user:UUID**
     '''
     result = af.return_entidad_expesifiqued("./json/Tweets.json", tweet_id,"tweet_id")
     return result
