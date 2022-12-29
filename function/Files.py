@@ -21,12 +21,12 @@ def include_json(path,dic):
         results.append(dic)
         file.seek(0)
         file.write(json.dumps(results))
-    return results
+        return results
 
-def update_json(path, dictionary, results,id):
-    for user in results:
-        if user["user_id"] == id:
-            results[results.index(user)] = dictionary
+def update_json(path, dictionary, results,id,campo):
+    for item in results:
+        if item[campo] == id:
+            results[results.index(item)] = dictionary
             remplace_json(path,results)
             return dictionary,True
     else:
@@ -36,7 +36,6 @@ def update_json(path, dictionary, results,id):
 
 def return_entidad_expesifiqued(path, id, campo):
     results = read_json(path)
-
     for item in results:
         if item[campo] == id:
             return item

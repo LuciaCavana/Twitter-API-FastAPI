@@ -100,7 +100,7 @@ def post(tweets:Tweets = Body(...)):
 
     )
 def show_tweet(
-    tweet_id:str = Path(..., max_length=36, min_length=36, title="Tweet id", description="This is a tweet id",example=1)
+    tweet_id:str = Path(..., max_length=36, min_length=36, title="Tweet id", description="This is a tweet id",example="3fa85f64-5717-4562-b3fc-2c963f66afa6")
 ):
     '''
     Show tweet
@@ -176,8 +176,9 @@ def update_tweet(
     tweet["tweet_id"] = tweet_id
     tweet["id_user"] = str(item["id_user"])
     tweet["created_at"] = str(item["created_at"])
+    tweet["update_at"] = str(tweet["update_at"])
     
-    tweet_update, term = af.update_json("./json/Users.json", tweet, (af.read_json("./json/Users.json")),tweet_id)
+    tweet_update, term = af.update_json("./json/Tweets.json", tweet, (af.read_json("./json/Tweets.json")),tweet_id,"tweet_id")
     if term == False:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -192,7 +193,7 @@ def update_tweet(
 
 @app.post(
     path="/signup",
-    response_model=UserShow, 
+    #response_model=UserShow, 
     status_code=status.HTTP_201_CREATED,
     summary="Register a user",
     tags=[tags_users]
@@ -227,7 +228,6 @@ def signup(user:UserRegister = Body(...)):
 
 @app.post(
     path="/login",
-    #response_model=UserShow,
     summary="Login a user",
     status_code=status.HTTP_200_OK, 
     tags=[tags_users])
@@ -246,12 +246,13 @@ def login(
         
     Returns a user model with first name, last name, age, user id, username and email
     '''
-    users_dict = af.read_json("./json/Users.json") #return dictionary Users
-    for user in users_dict:
+
+    Users = af.read_json("./json/Users.json") #return dictionary Users
+    for user in Users:
        if user["username"] == username and user["password"] == password:
             return "Login exited is user : " + user["username"]
     raise HTTPException(
-       status_code=status.HTTP_404_NOT_FOUNDs,
+       status_code=status.HTTP_404_NOT_FOUND,
        detail= "Password or username is incorrect"
     )  
 
@@ -326,7 +327,7 @@ def show_users(
 
 )
 def delete_user(
-        user_id:str = Path(..., max_length=36, title="User id", description="This is a user id",example="3fa85f64-5717-4562-b3fc-2c963f66afa6")
+        user_id:str = Path(..., max_length=36, min_length=36,title="User id", description="This is a user id",example="3fa85f64-5717-4562-b3fc-2c963f66afa6")
 ):
     '''
     Delete user
@@ -339,7 +340,8 @@ def delete_user(
 
     Return menssage successful or not
     '''
-    return af.delete("./json/Users.json",user_id, "tweet_id","User deleted successfully","Non-existent user id!")
+
+    return af.delete("./json/Users.json",user_id, "user_id","User deleted successfully","Non-existent user id!")
 
 ###Update a user
 
@@ -369,13 +371,12 @@ def update_user(
 
     Return menssage successful or not
     '''
-    item = af.return_entidad_expesifiqued("./json/User.json")
     user_id = str(user_id)
     user = user.dict()
     user["user_id"] = user_id
     user["birth_date"] = str(user["birth_date"])
     
-    user, term = af.update_json("./json/Users.json", user, (af.read_json("./json/Users.json")),user_id)
+    user, term = af.update_json("./json/Users.json", user, (af.read_json("./json/Users.json")),user_id,"user_id")
     if term == False:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
