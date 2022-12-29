@@ -1,1 +1,32 @@
-[{"user_id": "5fa85f64-5717-4562-b3fc-2c963f66afa6", "user_email": "lucia@example.com", "first_name": "Lucia", "last_name": "Cavana", "user_age": 22, "birth_date": "2000-12-22", "username": "Dany", "password": "admin321"}, {"user_id": "4fa85f64-5717-4562-b3fc-2c963f66afa6", "user_email": "lucia@example.com", "first_name": "Lucia", "last_name": "Cavana", "user_age": 22, "birth_date": "2000-12-22", "username": "LucyDany", "password": "admin123"}, {"user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6", "user_email": "lucia@example.com", "first_name": "Lucia", "last_name": "Cavana", "user_age": 22, "birth_date": "2000-12-22"}]
+[
+    {
+        "user_id": "5fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "user_email": "lucia@example.com",
+        "first_name": "Lucia",
+        "last_name": "Cavana",
+        "user_age": 22,
+        "birth_date": "2000-12-22",
+        "username": "Dany",
+        "password": "admin321"
+    },
+    {
+        "user_id": "4fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "user_email": "lucia@example.com",
+        "first_name": "Lucia",
+        "last_name": "Cavana",
+        "user_age": 22,
+        "birth_date": "2000-12-22",
+        "username": "LucyDany",
+        "password": "admin123"
+    },
+    {
+        "user_id": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+        "user_email": "lucia@example.com",
+        "first_name": "Lucia",
+        "last_name": "Cavana",
+        "user_age": 22,
+        "birth_date": "2000-12-22",
+        "username": "Lucia",
+        "password": "admin133"
+    }
+]
